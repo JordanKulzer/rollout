@@ -23,3 +23,36 @@ git clone https://github.com/JordanKulzer/rollout.git
 cd rollout
 npm install
 npm start
+
+
+Create a .env file:
+
+EXPO_PUBLIC_SUPABASE_URL=your-url-here
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+
+
+Then run on your device or emulator:
+
+npx expo start
+
+📸 Screens (Coming Soon)
+
+Home Feed
+
+Camera Roll
+
+Profile & Stats
+
+Explore Events
+
+Author: Jordan Kulzer
+Built with ❤️ using Expo + Supabase
+
+
+You can add that file locally, then commit & push:
+
+```bash
+echo "# Roll-Out 🎲 ..." > README.md
+git add README.md
+git commit -m "Add project README"
+git push
