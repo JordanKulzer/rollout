@@ -1,10 +1,10 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "../screens/Tabs/HomeScreen";
-// import RollScreen from "../screens/RollScreen";
+import RollScreen from "../screens/Tabs/RollScreen";
 // import NotificationsScreen from "../screens/NotificationsScreen";
 import ProfileScreen from "../screens/Tabs/ProfileScreen";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import CameraScreen from "../screens/Tabs/CameraScreen";
 
 const Tab = createBottomTabNavigator();
@@ -32,6 +32,19 @@ export default function AppTabs() {
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="camera-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Roll"
+        component={RollScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="dice-multiple-outline"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />

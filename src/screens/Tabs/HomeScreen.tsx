@@ -7,6 +7,10 @@ import {
   useTheme,
   ActivityIndicator,
 } from "react-native-paper";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { supabase } from "../../lib/supabase";
 
 export default function HomeScreen() {
@@ -14,12 +18,26 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const theme = useTheme();
+  const insets = useSafeAreaInsets(); // returns { top, bottom, left, right }
 
   const fetchPosts = async () => {
     setLoading(true);
+    const user = (await supabase.auth.getUser()).data.user;
+
+    const { data: following } = await supabase
+      .from("follows")
+      .select("followed_id")
+      .eq("follower_id", user.id);
+
+    const followingIds = following?.map((f) => f.followed_id) || [];
+
+    // Include your own posts
+    const visibleIds = [...followingIds, user.id];
+
     const { data, error } = await supabase
       .from("posts")
       .select("*, profiles(username, avatar_url)")
+      .in("user_id", visibleIds)
       .order("created_at", { ascending: false });
 
     if (error) console.error(error);
@@ -29,6 +47,21 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchPosts();
+
+    const channel = supabase
+      .channel("public:posts")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "posts" },
+        (payload) => {
+          setPosts((prev) => [payload.new, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const onRefresh = async () => {
@@ -71,14 +104,16 @@ export default function HomeScreen() {
   );
 
   return (
-    <FlatList
-      data={posts}
-      keyExtractor={(item) => item.id}
-      renderItem={renderItem}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      contentContainerStyle={{ paddingBottom: 20 }}
-    />
+    <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
+    </SafeAreaView>
   );
 }
