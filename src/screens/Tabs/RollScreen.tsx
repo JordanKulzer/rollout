@@ -11,6 +11,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useTheme } from "react-native-paper";
+import * as Location from "expo-location";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL!;
 
@@ -33,8 +34,17 @@ export default function RollScreen() {
     }).start(async () => {
       setLoading(true);
       try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          alert("Permission to access location was denied");
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = location.coords;
+
         const res = await fetch(
-          `${API_BASE_URL}/roll?lat=34.0522&lon=-118.2437`
+          `${API_BASE_URL}/roll?lat=${latitude}&lon=${longitude}&radius=10000`
         );
         const data = await res.json();
         setEvents(data);
